@@ -63,7 +63,8 @@ RestauranteList.Item = function RestauranteListItem({
   return (
     <Link
       key={restaurante.id}
-      to={"/"}
+      to={"/restaurante/$id"}
+      params={{ id: restaurante.id }}
       className="group relative flex min-h-44 flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_16px_40px_-20px_rgba(216,13,21,0.35)] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/20"
     >
       <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
