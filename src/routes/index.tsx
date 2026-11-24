@@ -5,5 +5,5 @@ export const Route = createFileRoute("/")({
 });
 
 function RouteComponent() {
-  return <div>Hello "/"!</div>;
+  return <div className="max-w-7xl mx-auto w-full py-20">Hello "/"!</div>;
 }
