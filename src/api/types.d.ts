@@ -287,6 +287,16 @@ export interface components {
             /** Nome */
             nome: string;
         };
+        /** GetRestauranteResponse */
+        GetRestauranteResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nome */
+            nome: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -798,7 +808,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["GetRestauranteResponse"];
                 };
             };
             /** @description Validation Error */
