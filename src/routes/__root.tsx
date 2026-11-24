@@ -1,10 +1,20 @@
-import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
-import type { QueryClient } from '@tanstack/react-query'
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+import Header from "@/components/layout/header";
 
 export interface RouterContext {
-  queryClient: QueryClient
+  queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-  component: () => <Outlet />,
-})
+  component: () => (
+    <>
+      <Layout />
+      <Outlet />
+    </>
+  ),
+});
+
+function Layout() {
+  return <Header />;
+}
