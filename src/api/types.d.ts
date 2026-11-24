@@ -292,6 +292,21 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** ListRestaurantesResponse */
+        ListRestaurantesResponse: {
+            /** Restaurantes */
+            restaurantes: components["schemas"]["Restaurante"][];
+        };
+        /** Restaurante */
+        Restaurante: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nome */
+            nome: string;
+        };
         /** UpdatePedidoRequest */
         UpdatePedidoRequest: {
             /**
@@ -728,7 +743,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ListRestaurantesResponse"];
                 };
             };
         };
