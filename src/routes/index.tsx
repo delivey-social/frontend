@@ -1,8 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { apiClient } from "@/api/client";
-import type { components } from "@/api/types";
-import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import RestauranteList from "@/components/contexts/restaurante/components/restaurante-list";
 
 export const Route = createFileRoute("/")({

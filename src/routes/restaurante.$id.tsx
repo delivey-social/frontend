@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 import useRestauranteDetails from "@/components/contexts/restaurante/hooks/useRestauranteDetails";
+import type { components } from "@/api/types";
+import useRestauranteImage from "@/components/contexts/restaurante/hooks/useRestauranteImage";
 
 export const Route = createFileRoute("/restaurante/$id")({
   component: RestauranteRoute,
@@ -32,16 +34,7 @@ function RestauranteRoute() {
 
       {!isPending && !error && !restaurante && <RestauranteRoute.NotFound />}
 
-      {restaurante && (
-        <section className="mt-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-            Cardápio
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950">
-            {restaurante.nome}
-          </h1>
-        </section>
-      )}
+      {restaurante && <RestauranteDetails restaurante={restaurante} />}
     </main>
   );
 }
@@ -62,3 +55,28 @@ RestauranteRoute.Error = ({ error }: { error: unknown }) => {
 RestauranteRoute.NotFound = () => {
   return <p className="mt-8 text-zinc-600">Restaurante não encontrado.</p>;
 };
+
+interface RestauranteDetailsProps {
+  restaurante: components["schemas"]["Restaurante"];
+}
+
+function RestauranteDetails({ restaurante }: RestauranteDetailsProps) {
+  const image = useRestauranteImage(restaurante.id);
+
+  return (
+    <section className="mt-8 flex gap-8 items-center">
+      {image && (
+        <img src={image} alt="" className="size-26 object-cover rounded-xl" />
+      )}
+
+      <div className="flex flex-col">
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+          Cardápio
+        </p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950">
+          {restaurante.nome}
+        </h1>
+      </div>
+    </section>
+  );
+}
