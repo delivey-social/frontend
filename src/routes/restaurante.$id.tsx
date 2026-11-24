@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import useRestauranteDetails from "@/components/contexts/restaurante/hooks/useRestauranteDetails";
 import type { components } from "@/api/types";
 import useRestauranteImage from "@/components/contexts/restaurante/hooks/useRestauranteImage";
+import useMenu from "@/components/contexts/restaurante/hooks/useMenu";
 
 export const Route = createFileRoute("/restaurante/$id")({
   component: RestauranteRoute,
@@ -34,7 +35,12 @@ function RestauranteRoute() {
 
       {!isPending && !error && !restaurante && <RestauranteRoute.NotFound />}
 
-      {restaurante && <RestauranteDetails restaurante={restaurante} />}
+      {restaurante && (
+        <>
+          <RestauranteDetails restaurante={restaurante} />
+          <RestauranteMenu restaurante={restaurante} />
+        </>
+      )}
     </main>
   );
 }
@@ -77,6 +83,49 @@ function RestauranteDetails({ restaurante }: RestauranteDetailsProps) {
           {restaurante.nome}
         </h1>
       </div>
+    </section>
+  );
+}
+
+function RestauranteMenu({ restaurante }: RestauranteDetailsProps) {
+  const { data: menu, error, isPending } = useMenu(restaurante.id);
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-2xl font-bold tracking-tight text-zinc-950">
+        Cardápio
+      </h2>
+
+      {isPending && (
+        <p className="mt-4 text-zinc-600">Carregando cardápio...</p>
+      )}
+
+      {error && (
+        <p className="mt-4 text-red-700" role="alert">
+          Não foi possível carregar o cardápio.{" "}
+          {error instanceof Error && error.message}
+        </p>
+      )}
+
+      {!isPending && !error && !menu && (
+        <p className="mt-4 text-zinc-600">Cardápio não encontrado.</p>
+      )}
+
+      {menu && (
+        <ul className="mt-4 flex flex-col gap-4">
+          {menu.itens.map((item) => (
+            <li key={item.id} className="flex items-center gap-4">
+              <div className="flex flex-col">
+                <span className="font-semibold">{item.nome}</span>
+                <span className="text-sm text-zinc-600">{item.descricao}</span>
+              </div>
+              <span className="ml-auto font-semibold text-zinc-950">
+                R$ {item.preco.toFixed(2)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
