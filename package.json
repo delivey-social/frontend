@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "api-types": "node --env-file-if-exists=.env scripts/generate-api-types.ts",
     "build": "vite build && tsc -b",
     "lint": "eslint .",
     "preview": "vite preview"
