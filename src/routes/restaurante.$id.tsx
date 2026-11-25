@@ -7,6 +7,7 @@ import useRestauranteDetails from "@/components/contexts/restaurante/hooks/useRe
 import type { components } from "@/api/types";
 import useRestauranteImage from "@/components/contexts/restaurante/hooks/useRestauranteImage";
 import useMenu from "@/components/contexts/restaurante/hooks/useMenu";
+import MenuList from "@/components/contexts/restaurante/components/menu-list";
 
 export const Route = createFileRoute("/restaurante/$id")({
   component: RestauranteRoute,
@@ -91,7 +92,7 @@ function RestauranteMenu({ restaurante }: RestauranteDetailsProps) {
   const { data: menu, error, isPending } = useMenu(restaurante.id);
 
   return (
-    <section className="mt-8">
+    <section className="mt-16">
       <h2 className="text-2xl font-bold tracking-tight text-zinc-950">
         Cardápio
       </h2>
@@ -111,21 +112,7 @@ function RestauranteMenu({ restaurante }: RestauranteDetailsProps) {
         <p className="mt-4 text-zinc-600">Cardápio não encontrado.</p>
       )}
 
-      {menu && (
-        <ul className="mt-4 flex flex-col gap-4">
-          {menu.itens.map((item) => (
-            <li key={item.id} className="flex items-center gap-4">
-              <div className="flex flex-col">
-                <span className="font-semibold">{item.nome}</span>
-                <span className="text-sm text-zinc-600">{item.descricao}</span>
-              </div>
-              <span className="ml-auto font-semibold text-zinc-950">
-                R$ {item.preco.toFixed(2)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {menu && <MenuList menu={menu} />}
     </section>
   );
 }
