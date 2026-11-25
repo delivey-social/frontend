@@ -3,16 +3,43 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
   useCallback,
+  useReducer,
   type ReactNode,
 } from "react";
 import type { components } from "@/api/types";
+import { Button } from "@/components/ui/button";
+import RestaurantConflictAlert from "./components/restaurant-conflict-alert";
 
 interface Order {
   restauranteId: string;
   items: OrderItem[];
 }
+
+interface OrderState {
+  order: Order | null;
+  restaurantConflict: {
+    item: components["schemas"]["MenuItem"];
+    restauranteId: string;
+  } | null;
+}
+
+type OrderAction =
+  | {
+      type: "add-item";
+      item: components["schemas"]["MenuItem"];
+      restauranteId: string;
+    }
+  | {
+      type: "replace-order";
+      item: components["schemas"]["MenuItem"];
+      restauranteId: string;
+    }
+  | { type: "remove-item"; item: components["schemas"]["MenuItem"] }
+  | {
+      type: "remove-item-completely";
+      item: components["schemas"]["MenuItem"];
+    };
 
 export interface OrderItem {
   item: components["schemas"]["MenuItem"];
@@ -34,8 +61,109 @@ interface OrderContextValue {
 
 const OrderContext = createContext<OrderContextValue | null>(null);
 
+function orderReducer(state: OrderState, action: OrderAction): OrderState {
+  if (action.type === "replace-order") {
+    return {
+      order: {
+        restauranteId: action.restauranteId,
+        items: [{ item: action.item, quantity: 1 }],
+      },
+      restaurantConflict: null,
+    };
+  }
+
+  if (action.type === "add-item") {
+    if (state.order && state.order.restauranteId !== action.restauranteId) {
+      return {
+        ...state,
+        restaurantConflict: {
+          item: action.item,
+          restauranteId: action.restauranteId,
+        },
+      };
+    }
+
+    if (!state.order) {
+      return {
+        order: {
+          restauranteId: action.restauranteId,
+          items: [{ item: action.item, quantity: 1 }],
+        },
+        restaurantConflict: null,
+      };
+    }
+
+    const existing = state.order.items.find(
+      (orderItem) => orderItem.item.id === action.item.id,
+    );
+
+    return {
+      order: existing
+        ? {
+            ...state.order,
+            items: state.order.items.map((orderItem) =>
+              orderItem === existing
+                ? { ...orderItem, quantity: orderItem.quantity + 1 }
+                : orderItem,
+            ),
+          }
+        : {
+            ...state.order,
+            items: [...state.order.items, { item: action.item, quantity: 1 }],
+          },
+      restaurantConflict: null,
+    };
+  }
+
+  if (action.type === "remove-item") {
+    if (!state.order) throw new Error("No order to remove item from");
+
+    const existing = state.order.items.find(
+      (orderItem) => orderItem.item.id === action.item.id,
+    );
+
+    if (!existing) throw new Error("Item not found in order");
+
+    if (existing.quantity > 1) {
+      return {
+        ...state,
+        order: {
+          ...state.order,
+          items: state.order.items.map((orderItem) =>
+            orderItem === existing
+              ? { ...orderItem, quantity: orderItem.quantity - 1 }
+              : orderItem,
+          ),
+        },
+      };
+    }
+
+    const items = state.order.items.filter(
+      (orderItem) => orderItem !== existing,
+    );
+    return {
+      ...state,
+      order: items.length > 0 ? { ...state.order, items } : null,
+    };
+  }
+
+  if (!state.order) throw new Error("No order to remove item from");
+
+  const items = state.order.items.filter(
+    (orderItem) => orderItem.item.id !== action.item.id,
+  );
+  return {
+    ...state,
+    order: items.length > 0 ? { ...state.order, items } : null,
+  };
+}
+
 export function OrderProvider({ children }: { children: ReactNode }) {
-  const [order, setOrder] = useState<Order | null>(null);
+  const [state, dispatch] = useReducer(orderReducer, {
+    order: null,
+    restaurantConflict: null,
+  });
+  const { order, restaurantConflict } = state;
 
   useEffect(() => {
     console.log("Current order:", order);
@@ -43,73 +171,18 @@ export function OrderProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     (item: components["schemas"]["MenuItem"], restauranteId: string) => {
-      setOrder((current) => {
-        if (!current) {
-          return { restauranteId, items: [{ item, quantity: 1 }] };
-        }
-
-        const existing = current.items.find(
-          (orderItem) => orderItem.item.id === item.id,
-        );
-
-        if (existing) {
-          return {
-            restauranteId: current.restauranteId,
-            items: current.items.map((orderItem) => {
-              if (orderItem === existing) {
-                return { ...orderItem, quantity: orderItem.quantity + 1 };
-              }
-
-              return orderItem;
-            }),
-          };
-        }
-
-        return {
-          restauranteId: current.restauranteId,
-          items: [...current.items, { item, quantity: 1 }],
-        };
-      });
+      dispatch({ type: "add-item", item, restauranteId });
     },
     [],
   );
 
   const removeItem = useCallback((item: components["schemas"]["MenuItem"]) => {
-    setOrder((current) => {
-      if (!current) throw new Error("No order to remove item from");
-
-      const existing = current.items.find(
-        (orderItem) => orderItem.item.id === item.id,
-      );
-
-      if (!existing) throw new Error("Item not found in order");
-
-      if (existing.quantity > 1) {
-        return {
-          restauranteId: current.restauranteId,
-          items: current.items.map((orderItem) =>
-            orderItem === existing
-              ? { ...orderItem, quantity: orderItem.quantity - 1 }
-              : orderItem,
-          ),
-        };
-      }
-
-      const items = current.items.filter((orderItem) => orderItem !== existing);
-      return items.length > 0 ? { ...current, items } : null;
-    });
+    dispatch({ type: "remove-item", item });
   }, []);
 
   const removeItemCompletely = useCallback(
     (item: components["schemas"]["MenuItem"]) => {
-      setOrder((current) => {
-        if (!current) throw new Error("No order to remove item from");
-
-        const items = current.items.filter(
-          (orderItem) => orderItem.item.id !== item.id,
-        );
-        return items.length > 0 ? { ...current, items } : null;
-      });
+      dispatch({ type: "remove-item-completely", item });
     },
     [],
   );
@@ -120,7 +193,16 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <OrderContext.Provider value={value}>{children}</OrderContext.Provider>
+    <OrderContext.Provider value={value}>
+      {children}
+      {restaurantConflict && (
+        <RestaurantConflictAlert
+          onActionClick={() =>
+            dispatch({ type: "replace-order", ...restaurantConflict })
+          }
+        />
+      )}
+    </OrderContext.Provider>
   );
 }
 
