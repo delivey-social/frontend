@@ -29,6 +29,7 @@ interface OrderContextValue {
     item: components["schemas"]["MenuItem"],
     restauranteId: string,
   ) => void;
+  removeItemCompletely: (item: components["schemas"]["MenuItem"]) => void;
 }
 
 const OrderContext = createContext<OrderContextValue | null>(null);
@@ -94,16 +95,28 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         };
       }
 
-      return {
-        restauranteId: current.restauranteId,
-        items: current.items.filter((orderItem) => orderItem !== existing),
-      };
+      const items = current.items.filter((orderItem) => orderItem !== existing);
+      return items.length > 0 ? { ...current, items } : null;
     });
   }, []);
 
+  const removeItemCompletely = useCallback(
+    (item: components["schemas"]["MenuItem"]) => {
+      setOrder((current) => {
+        if (!current) throw new Error("No order to remove item from");
+
+        const items = current.items.filter(
+          (orderItem) => orderItem.item.id !== item.id,
+        );
+        return items.length > 0 ? { ...current, items } : null;
+      });
+    },
+    [],
+  );
+
   const value = useMemo(
-    () => ({ order, addItem, removeItem }),
-    [order, addItem, removeItem],
+    () => ({ order, addItem, removeItem, removeItemCompletely }),
+    [order, addItem, removeItem, removeItemCompletely],
   );
 
   return (
