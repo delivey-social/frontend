@@ -53,10 +53,7 @@ function OrderDrawerPanel({ order }: { order: ActiveOrder }) {
       {!open && (
         <DrawerTrigger
           render={
-            <Button
-              className="fixed right-4 bottom-4 rounded-full shadow-lg px-6"
-              size={"lg"}
-            />
+            <Button className="fixed right-4 bottom-4 rounded-full shadow-lg px-6" />
           }
         >
           <ShoppingBag />
