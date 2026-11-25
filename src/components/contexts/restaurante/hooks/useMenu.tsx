@@ -9,5 +9,17 @@ export default function useMenu(restauranteId: string) {
         path: { restaurante_id: restauranteId },
       });
     },
+    select: (response) => {
+      const mappedItems = response.itens.map((item) => ({
+        id: item.id,
+        nome: item.nome,
+        preco: item.preco / 100,
+      }));
+
+      return {
+        ...response,
+        itens: mappedItems,
+      };
+    },
   });
 }
