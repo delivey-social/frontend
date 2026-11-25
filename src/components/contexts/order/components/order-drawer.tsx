@@ -7,6 +7,7 @@ import {
   UtensilsCrossed,
   X,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -97,18 +98,27 @@ function OrderDrawerPanel({ order }: { order: ActiveOrder }) {
           ))}
         </ul>
 
-        <DrawerFooter className="border-t px-5 pt-4 pb-6">
+        <DrawerFooter className="border-t px-5 pt-8 pb-6 gap-6">
           <div className="flex items-center justify-between text-base font-semibold">
             <span>Total</span>
             <span>{formatCurrency(total)}</span>
           </div>
-          <DrawerClose
-            render={
-              <Button type="button" variant="outline" className="w-full">
-                Continuar comprando
-              </Button>
-            }
-          />
+          <div className="flex gap-2">
+            <DrawerClose
+              render={
+                <Button type="button" variant="ghost" className="flex-1">
+                  Continuar comprando
+                </Button>
+              }
+            />
+            <Button
+              render={<Link to="/checkout" />}
+              className="flex-1"
+              onClick={() => setOpen(false)}
+            >
+              Finalizar pedido
+            </Button>
+          </div>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
