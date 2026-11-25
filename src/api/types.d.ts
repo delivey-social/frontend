@@ -287,6 +287,21 @@ export interface components {
             /** Nome */
             nome: string;
         };
+        /** GetMenuResponse */
+        GetMenuResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Restaurante Id
+             * Format: uuid
+             */
+            restaurante_id: string;
+            /** Itens */
+            itens: components["schemas"]["MenuItem"][];
+        };
         /** GetRestauranteResponse */
         GetRestauranteResponse: {
             /**
@@ -306,6 +321,18 @@ export interface components {
         ListRestaurantesResponse: {
             /** Restaurantes */
             restaurantes: components["schemas"]["Restaurante"][];
+        };
+        /** MenuItem */
+        MenuItem: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nome */
+            nome: string;
+            /** Preco */
+            preco: number;
         };
         /** Restaurante */
         Restaurante: {
@@ -521,7 +548,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["GetMenuResponse"];
                 };
             };
             /** @description Validation Error */
