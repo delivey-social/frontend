@@ -2,31 +2,16 @@ import type { components } from "@/api/types";
 
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, UtensilsCrossed } from "lucide-react";
+import { useOrder } from "@/components/contexts/order/order-context";
 
 import useMenuItemImage from "../hooks/useMenuItemImage";
-
-import { useState } from "react";
 
 interface MenuListProps {
   menu: components["schemas"]["GetMenuResponse"];
 }
 
 export default function MenuList({ menu }: MenuListProps) {
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-
-  function increaseQuantity(itemId: string) {
-    setQuantities((current) => ({
-      ...current,
-      [itemId]: (current[itemId] ?? 0) + 1,
-    }));
-  }
-
-  function decreaseQuantity(itemId: string) {
-    setQuantities((current) => ({
-      ...current,
-      [itemId]: Math.max(0, (current[itemId] ?? 0) - 1),
-    }));
-  }
+  const { order, addItem, removeItem } = useOrder();
 
   return (
     <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -34,9 +19,12 @@ export default function MenuList({ menu }: MenuListProps) {
         <MenuList.Item
           key={item.id}
           item={item}
-          quantity={quantities[item.id] ?? 0}
-          onIncrease={() => increaseQuantity(item.id)}
-          onDecrease={() => decreaseQuantity(item.id)}
+          quantity={
+            order?.items.find((orderItem) => orderItem.item.id === item.id)
+              ?.quantity ?? 0
+          }
+          onIncrease={() => addItem(item, menu.restaurante_id)}
+          onDecrease={() => removeItem(item, menu.restaurante_id)}
           restauranteId={menu.restaurante_id}
         />
       ))}

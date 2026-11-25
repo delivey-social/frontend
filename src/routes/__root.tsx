@@ -1,6 +1,7 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
 import Header from "@/components/layout/header";
+import { OrderProvider } from "@/components/contexts/order/order-context";
 
 export interface RouterContext {
   queryClient: QueryClient;
@@ -8,10 +9,10 @@ export interface RouterContext {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
-    <>
+    <OrderProvider>
       <Layout />
       <Outlet />
-    </>
+    </OrderProvider>
   ),
 });
 
